@@ -4,6 +4,7 @@ import InstructorRoute from '../../../components/routes/InstructorRoute';
 import CourseCreateForm from '../../../components/forms/CourseCreateForm';
 import Resizer from 'react-image-file-resizer';
 import { toast } from 'react-toastify';
+import router from 'next/router';
 
 const CourseCreate = () => {
   // state
@@ -16,7 +17,7 @@ const CourseCreate = () => {
     category: '',
     loading: false
   });
-  const [image, setImage] = useState('');
+  const [image, setImage] = useState({});
   const [preview, setPreview] = useState('');
   const [uploadButtonText, setUploadButtonText] = useState('Upload Image');
 
@@ -38,6 +39,7 @@ const CourseCreate = () => {
         });
         console.log('IMAGE UPLOADED', data);
         // set image in the state
+        setImage(data);
         setValues({ ...values, loading: false });
       } catch (err) {
         console.log(err);
@@ -47,9 +49,37 @@ const CourseCreate = () => {
     });
   };
 
-  const handleSubmit = e => {
+  const handleImageRemove = async () => {
+    console.log('RemoveImage');
+    try {
+      setValues({ ...values, loading: true });
+
+      const res = await axios.post('/api/course/remove-image', { image });
+      setImage({});
+      setPreview('');
+      setUploadButtonText('Upload Image');
+      setValues({ ...values, loading: false });
+    } catch (err) {
+      console.log(err);
+      setValues({ ...values, loading: false });
+      toast('Image upload failed. Try later.');
+    }
+  };
+
+  const handleSubmit = async e => {
     e.preventDefault();
-    console.log(values);
+    try {
+      // console.log(values);
+      const data = await axios.post('/api/course', {
+        ...values,
+        image
+      });
+      toast('Great! Now you can start adding lectures');
+      router.push('/instructor');
+    } catch (err) {
+      // toast(err.response.data);
+      console.log(err);
+    }
   };
 
   return (
@@ -64,6 +94,7 @@ const CourseCreate = () => {
           setValues={setValues}
           preview={preview}
           uploadButtonText={uploadButtonText}
+          handleImageRemove={handleImageRemove}
         />
       </div>
       <pre>{JSON.stringify(values, null, 4)}</pre>
