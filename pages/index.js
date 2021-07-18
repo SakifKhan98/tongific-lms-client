@@ -1,11 +1,43 @@
-const Index = () => {
+import axios from 'axios';
+import { useEffect, useState } from 'react';
+import CourseCard from '../components/cards/CourseCard';
+
+const Index = ({ courses }) => {
+  // const [courses, setCourses] = useState([]);
+
+  // useEffect(() => {
+  //   const fetchCourses = async () => {
+  //     const { data } = await axios.get('/api/courses');
+  //     setCourses(data);
+  //   };
+  //   fetchCourses();
+  // }, []);
   return (
     <>
       <h1 className="jumbotron text-center bg-primary square">
         Online Education Marketplace
       </h1>
-      <p>from NextJS...</p>
+      <div className="container-fluid">
+        <div className="row">
+          {courses.map(course => (
+            <div key={course._id} className="col-md-4">
+              {/* {<pre>{JSON.stringify(course, null, 4)}</pre>} */}
+              <CourseCard course={course}></CourseCard>
+            </div>
+          ))}
+        </div>
+      </div>
     </>
   );
 };
+
+export async function getServerSideProps() {
+  const { data } = await axios.get(`${process.env.API}/courses`);
+  return {
+    props: {
+      courses: data
+    }
+  };
+}
+
 export default Index;
